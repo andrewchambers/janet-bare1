@@ -26,7 +26,7 @@ A lot is missing, and the implementation is not optimized, but the concept is th
 
 (def buf @"\x06andrew\x00\x00\x01\x07dogfood\xff\x00")
 
-(_bare/decode schema :customer buf)
+(bare/decode schema :customer buf)
 
 # Decodes to:
  @{:name "andrew"
