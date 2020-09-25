@@ -49,11 +49,20 @@
 
 (do 
   (def schema '@{
-    :customer (struct :name string
-                      :email (optional string)
-                      :metadata (map string string))
+    
+    :customer
+      (struct :name string
+              :email (optional string)
+              :metadata (map string string)
+              :subscriptions (array :subscription))
+      
+    :subscription
+      (struct :product string
+              :plan uint)
   })
 
-  (def buf @"\x06andrew\x00\x00")
+  (def buf @"\x06andrew\x00\x00\x01\x07dogfood\xff\x00")
 
-  (assert (deep= (_bare/decode schema :customer buf) @{:name "andrew" :metadata @{}})))
+  (assert (deep=
+            (_bare/decode schema :customer buf)
+            @{:name "andrew" :metadata @{} :subscriptions @[@{:product "dogfood" :plan 127}]})))
