@@ -40,7 +40,7 @@ A lot is missing, and the implementation is not optimized, but the concept is th
 TODO...
 
 
-## Janet specific extenions and limitations
+## Janet specific extensions and limitations
 
 - The special rules 'keyword and 'symbol correspond to a BARE string, but are encoded/decoded as a janet keyword/symbol.
 - The 'uint rule corresponds to a janet double, you must use 'uint/u64 to explicitly decode to an int/u64 boxed integer.
