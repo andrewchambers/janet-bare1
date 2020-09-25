@@ -37,8 +37,13 @@ static void message_too_large_panic() {
   janet_panic("BARE message too large for implementation");
 }
 
-static void varint_exceeded_limits_panic() {
-  janet_panic("BARE variable int too large for janet number");
+static int32_t decode_size_varuint(uint8_t *buf, size_t sz, size_t *offset) {
+    uint64_t len;
+    if (!decode_varuint(buf, sz, offset, &len))
+      could_not_decode_panic();
+    if (len > 0x7fffffff)
+      message_too_large_panic();
+    return (int32_t) len;
 }
 
 static Janet bare_decode2(JanetTable *schema, Janet rule, uint8_t *buf, size_t sz, size_t *offset) {
@@ -74,14 +79,10 @@ static Janet bare_decode2(JanetTable *schema, Janet rule, uint8_t *buf, size_t s
         Janet key_rule = t[1];
         Janet val_rule = t[2];
 
-        uint64_t len;
-        if (!decode_varuint(buf, sz, offset, &len))
-          could_not_decode_panic();
-        if (len > 0x7fffffff)
-          message_too_large_panic();
+        int32_t len = decode_size_varuint(buf, sz, offset);
 
         JanetTable *s = janet_table(len);
-        for (size_t i = 0; i < len; i ++) {
+        for (int32_t i = 0; i < len; i ++) {
           Janet key = bare_decode2(schema, key_rule, buf, sz, offset);
           Janet value = bare_decode2(schema, val_rule, buf, sz, offset);
           janet_table_put(s, key, value);
@@ -109,14 +110,10 @@ static Janet bare_decode2(JanetTable *schema, Janet rule, uint8_t *buf, size_t s
 
         if (tlen == 2) {
          
-          uint64_t len;
-          if (!decode_varuint(buf, sz, offset, &len))
-            could_not_decode_panic();
-          if (len > 0x7fffffff)
-            message_too_large_panic();
+          int32_t len = decode_size_varuint(buf, sz, offset);
           
           JanetArray *array = janet_array(len);
-          for (size_t i = 0; i < len; i++) {
+          for (int32_t i = 0; i < len; i++) {
             janet_array_push(array, bare_decode2(schema, t[1], buf, sz, offset));
           }
           return janet_wrap_array(array);
@@ -171,16 +168,12 @@ static Janet bare_decode2(JanetTable *schema, Janet rule, uint8_t *buf, size_t s
           if (!decode_varuint(buf, sz, offset, &v))
             could_not_decode_panic();
           if (v != (uint64_t)(double)v)
-            varint_exceeded_limits_panic();
+            janet_panic("BARE variable int too large for janet number");
           return janet_wrap_number(v);
 
       } else if (janet_symeq(rule, "data")) {
-          
-        uint64_t len;
-        if (!decode_varuint(buf, sz, offset, &len))
-          could_not_decode_panic();
-        if (len > 0x7fffffff)
-          message_too_large_panic();
+        
+        int32_t len = decode_size_varuint(buf, sz, offset);
         if (*offset+len > sz)
           unexpected_end_of_buffer_panic();
         JanetBuffer *data = janet_buffer(len);
@@ -190,11 +183,7 @@ static Janet bare_decode2(JanetTable *schema, Janet rule, uint8_t *buf, size_t s
 
       } else if (janet_symeq(rule, "string")) {
           
-        uint64_t len;
-        if (!decode_varuint(buf, sz, offset, &len))
-          could_not_decode_panic();
-        if (len > 0x7fffffff)
-          message_too_large_panic();
+        int32_t len = decode_size_varuint(buf, sz, offset);
         if (*offset+len > sz)
           unexpected_end_of_buffer_panic();
         Janet s = janet_stringv(buf + *offset, len);
@@ -202,11 +191,7 @@ static Janet bare_decode2(JanetTable *schema, Janet rule, uint8_t *buf, size_t s
         return s;
       } else if (janet_symeq(rule, "keyword")) {
           
-        uint64_t len;
-        if (!decode_varuint(buf, sz, offset, &len))
-          could_not_decode_panic();
-        if (len > 0x7fffffff)
-          message_too_large_panic();
+        int32_t len = decode_size_varuint(buf, sz, offset);
         if (*offset+len > sz)
           unexpected_end_of_buffer_panic();
         Janet s = janet_keywordv(buf + *offset, len);
@@ -214,12 +199,8 @@ static Janet bare_decode2(JanetTable *schema, Janet rule, uint8_t *buf, size_t s
         return s;
 
       } else if (janet_symeq(rule, "symbol")) {
-          
-        uint64_t len;
-        if (!decode_varuint(buf, sz, offset, &len))
-          could_not_decode_panic();
-        if (len > 0x7fffffff)
-          message_too_large_panic();
+        
+        int32_t len = decode_size_varuint(buf, sz, offset);
         if (*offset+len > sz)
           unexpected_end_of_buffer_panic();
         Janet s = janet_symbolv(buf + *offset, len);
