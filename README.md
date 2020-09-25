@@ -1,6 +1,6 @@
 # janet-bare
 
-WIP (BARE)[https://baremessages.org/] encoder/decoder for janet.
+WIP [BARE](https://baremessages.org) encoder/decoder for janet.
 
 A lot is missing, and the implementation is not optimized, but the concept is there.
 
