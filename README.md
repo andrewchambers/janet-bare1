@@ -38,3 +38,10 @@ A lot is missing, and the implementation is not optimized, but the concept is th
 ## Encoding
 
 TODO...
+
+
+## Janet specific extenions and limitations
+
+- The special rules 'keyword and 'symbol correspond to a BARE string, but are encoded/decoded as a janet keyword/symbol.
+- The 'uint rule corresponds to a janet double, you must use 'uint/u64 to explicitly decode to an int/u64 boxed integer.
+- Arrays, maps and buffers are limited to 0x7fffffff elements corresponding with janet implementation limits.
