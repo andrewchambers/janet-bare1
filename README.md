@@ -1,4 +1,4 @@
-# janet-bare
+# janet-bare1
 
 WIP [BARE](https://baremessages.org) encoder/decoder for janet.
 
