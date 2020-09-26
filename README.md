@@ -6,8 +6,6 @@ A lot is missing, and the implementation is not optimized, but the concept is th
 
 # Usage
 
-## Decoding
-
 ```
 (import bare1 :as bare)
  
@@ -24,21 +22,24 @@ A lot is missing, and the implementation is not optimized, but the concept is th
             :plan uint)
 })
 
-(def buf @"\x06andrew\x00\x00\x01\x07dogfood\xff\x00")
+
+(def customer
+  @{:name "andrew"
+   :metadata @{}
+   :subscriptions @[@{:product "dogfood" :plan 127}]})
+
+(def buf (bare/encode schema :customer customer))
+
+# (pp buf)
+# @"\x06andrew\x00\x00\x01\x07dogfood\x7f"
 
 (bare/decode schema :customer buf)
-
-# Decodes to:
- @{:name "andrew"
-   :metadata @{}
-   :subscriptions @[@{:product "dogfood" :plan 127}]}
+# Decodes back to:
+# @{:name "andrew"
+#   :metadata @{}
+#   :subscriptions @[@{:product "dogfood" :plan 127}]}
       
 ```
-
-## Encoding
-
-TODO...
-
 
 ## Janet specific extensions and limitations
 

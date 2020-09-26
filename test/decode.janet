@@ -38,14 +38,12 @@
 
 # fixed array
 (assert (deep= (_bare/decode @{} '(array u8) @"\x00") @[]))
-(assert (deep= (_bare/decode @{} '(array 2 u8) @"\x00\xff") @[0 255]))
+(assert (deep= (_bare/decode @{} '(array u8 2) @"\x00\xff") @[0 255]))
 
 # strings
 (assert (deep= 
           (_bare/decode @{} '(struct :a string :b keyword :c symbol) @"\x01x\x01x\x01x")
           @{:a "x" :b :x :c 'x}))
-
-
 
 (do 
   (def schema '@{
@@ -61,7 +59,7 @@
               :plan uint)
   })
 
-  (def buf @"\x06andrew\x00\x00\x01\x07dogfood\xff\x00")
+  (def buf @"\x06andrew\x00\x00\x01\x07dogfood\x7f")
 
   (assert (deep=
             (_bare/decode schema :customer buf)
